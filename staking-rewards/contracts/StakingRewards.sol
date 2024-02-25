@@ -98,6 +98,9 @@ contract StakingRewards is Initializable, UUPSUpgradeable, AccessControlUpgradea
 
     // Constructor and initializer
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     /**
      * @dev Initializes the contract with the specified parameters.
      * @param _owner The address of the contract owner.

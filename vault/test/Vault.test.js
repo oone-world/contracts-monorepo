@@ -11,6 +11,9 @@ describe("Vault", () => {
     await usdtToken.waitForDeployment();
 
     const signer = await ethers.provider.getSigner(0);
+
+    const rewardsDistributorWithoutTransfer = await ethers.deployContract("RewardsDistributorMockTransfer", [usdtToken.target]);
+    await rewardsDistributorWithoutTransfer.waitForDeployment();
     
     const rewardsDistributorOone = await ethers.deployContract("RewardsDistributorMock", [ooneToken.target]);
     await rewardsDistributorOone.waitForDeployment();
@@ -37,7 +40,7 @@ describe("Vault", () => {
       value: refillAmount,
     });
 
-    return {ooneToken, usdtToken, vault, signer, contractToRefill3, contractToRefill4, minWorkingBalance, refillAmount, testAddress, testUserId};
+    return {ooneToken, usdtToken, vault, signer, contractToRefill3, contractToRefill4, minWorkingBalance, refillAmount, testAddress, testUserId, rewardsDistributorWithoutTransfer};
   }
 
   describe("Deployment", async () => {
@@ -164,6 +167,16 @@ describe("Vault", () => {
       assert.equal(vaultBalanceAfter - vaultBalanceBefore, -1);
       assert.equal(rewardsDistributorOoneBalanceAfter - rewardsDistributorOoneBalanceBefore, 1);
     });
+
+    it("refillRewardsDistributorOone should revert if RewardsDistributor wasn't refilled", async () => {
+      const { vault, signer, testUserId, rewardsDistributorWithoutTransfer } = await loadFixture(deployVaultFixture);
+      await vault.grantRole(await vault.REFILL_BALANCE_ROLE(), signer.address);
+
+      await vault.setRewardsDistributorOone(rewardsDistributorWithoutTransfer)
+      
+      await expect(vault.refillRewardsDistributorOone(testUserId, 1n))
+        .to.be.revertedWith("Failed to transfer");
+    });
   });
 
   describe("refillRewardsDistributorUsdt", async () => {
@@ -188,6 +201,16 @@ describe("Vault", () => {
       
       assert.equal(vaultBalanceAfter - vaultBalanceBefore, -1);
       assert.equal(rewardsDistributorUsdtBalanceAfter - rewardsDistributorUsdtBalanceBefore, 1);
+    });
+
+    it("refillRewardsDistributorUsdt should revert if RewardsDistributor wasn't refilled", async () => {
+      const { vault, signer, testUserId, rewardsDistributorWithoutTransfer } = await loadFixture(deployVaultFixture);
+      await vault.grantRole(await vault.REFILL_BALANCE_ROLE(), signer.address);
+
+      await vault.setRewardsDistributorUsdt(rewardsDistributorWithoutTransfer)
+      
+      await expect(vault.refillRewardsDistributorUsdt(testUserId, 1n))
+        .to.be.revertedWith("Failed to transfer");
     });
   });
 

@@ -52,6 +52,9 @@ contract RewardsDistributor is Initializable, UUPSUpgradeable, AccessControlUpgr
      */
     event RewardsTokenChanged(address oldRewardsToken, address newRewardsToken);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     /**
      * @dev Initializes the contract with the rewards token address and sets the owner.
      * @param _rewardsTokenAddress The address of the rewards token.

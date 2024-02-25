@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 interface RewardsDistributor {
     function refillBalance(string calldata _user, uint256 _amount) external;
@@ -97,6 +98,9 @@ contract Vault is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
      */
     event NativeReceived(address indexed sender, uint256 amount);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     /**
      * @dev Initialize the Vault contract with initial parameters.
      * @param _ooneTokenAddress Address of the OONE token contract.
@@ -179,8 +183,12 @@ contract Vault is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
      * @param _user User for whom the balance is being refilled.
      * @param _amount Amount to refill.
      */
-    function refillRewardsDistributorOone(string calldata _user, uint256 _amount) external onlyRole(REFILL_BALANCE_ROLE) {
-        ooneToken.approve(rewardsDistributorOone, _amount);
+    function refillRewardsDistributorOone(string calldata _user, uint256 _amount)
+        external
+        onlyRole(REFILL_BALANCE_ROLE)
+        checkIfTransferred(ooneToken, rewardsDistributorOone, _amount)
+    {
+        ooneToken.safeIncreaseAllowance(rewardsDistributorOone, _amount);
         RewardsDistributor(rewardsDistributorOone).refillBalance(_user, _amount);
 
         emit RewardsDistributorOoneRefilled(rewardsDistributorOone, _user, _amount);
@@ -192,8 +200,12 @@ contract Vault is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
      * @param _user User for whom the balance is being refilled.
      * @param _amount Amount to refill.
      */
-    function refillRewardsDistributorUsdt(string calldata _user, uint256 _amount) external onlyRole(REFILL_BALANCE_ROLE) {
-        usdtToken.approve(rewardsDistributorUsdt, _amount);
+    function refillRewardsDistributorUsdt(string calldata _user, uint256 _amount)
+        external
+        onlyRole(REFILL_BALANCE_ROLE)
+        checkIfTransferred(usdtToken, rewardsDistributorUsdt, _amount)
+    {
+        usdtToken.safeIncreaseAllowance(rewardsDistributorUsdt, _amount);
         RewardsDistributor(rewardsDistributorUsdt).refillBalance(_user, _amount);
 
         emit RewardsDistributorUsdtRefilled(rewardsDistributorUsdt, _user, _amount);
@@ -207,7 +219,7 @@ contract Vault is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
     function refillBalances(address payable[] calldata addresses) external onlyRole(REFILL_BALANCE_ROLE) {
         for (uint256 i = 0; i < addresses.length; i++) {
             if (addresses[i].balance < minWorkingBalance) {
-                addresses[i].transfer(refillAmount);
+                Address.sendValue(addresses[i], refillAmount);
 
                 emit BalanceRefilled(addresses[i], refillAmount);
             }
@@ -234,4 +246,16 @@ contract Vault is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
      * @param newImplementation Address of the new implementation contract.
      */
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    /**
+     * @dev Modifier that checks amount of token was transferred to address.
+     * Reverts with an "Failed to transfer" error.
+     */
+    modifier checkIfTransferred(IERC20 _token, address _address, uint256 _amount) {
+        uint256 balanceBefore = _token.balanceOf(_address);
+        _;
+        uint256 balanceAfter = _token.balanceOf(_address);
+
+        require(balanceAfter - balanceBefore == _amount, "Failed to transfer");
+    }
 }
