@@ -137,7 +137,7 @@ describe('StakingRewards', () => {
 		const rewardValue = toUnit(1);
 
 		beforeEach(async () => {
-			await rewardsToken.transfer(stakingRewards.target, rewardValue, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, rewardValue, { from: owner });
 			await stakingRewards.revokeRole(await stakingRewards.START_STAKING_ROLE(), owner);
             await stakingRewards.revokeRole(await stakingRewards.DEFAULT_ADMIN_ROLE(), owner);
 		});
@@ -230,7 +230,7 @@ describe('StakingRewards', () => {
 
 		describe('when updated', () => {
 			it('should equal current timestamp', async () => {
-                await rewardsToken.transfer(stakingRewards.target, toUnit(1.0), { from: owner });
+                await rewardsToken.approve(stakingRewards.target, toUnit(1.0), { from: owner });
 				await stakingRewards.notifyRewardAmount(toUnit(1.0), {
 					from: owner,
 				});
@@ -257,7 +257,7 @@ describe('StakingRewards', () => {
 			assert.equal(totalSupply > ZERO_BN, true);
 
 			const rewardValue = toUnit(5000.0);
-			await rewardsToken.transfer(stakingRewards.target, rewardValue, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, rewardValue, { from: owner });
 			await stakingRewards.notifyRewardAmount(rewardValue, {
 				from: owner,
 			});
@@ -302,7 +302,7 @@ describe('StakingRewards', () => {
 			await stakingRewards.stake(totalToStake, { from: owner });
 
 			const rewardValue = toUnit(5000.0);
-			await rewardsToken.transfer(stakingRewards.target, rewardValue, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, rewardValue, { from: owner });
 			await stakingRewards.notifyRewardAmount(rewardValue, {
 				from: owner,
 			});
@@ -317,14 +317,14 @@ describe('StakingRewards', () => {
 		it('rewardRate should increase if new rewards come before DURATION ends', async () => {
 			const totalToDistribute = toUnit('5000');
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
 
 			const rewardRateInitial = await stakingRewards.rewardRate();
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -342,7 +342,7 @@ describe('StakingRewards', () => {
 			await stakingToken.approve(stakingRewards.target, totalToStake, { from: owner });
 			await stakingRewards.stake(totalToStake, { from: owner });
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -350,7 +350,7 @@ describe('StakingRewards', () => {
 			await time.increase(DAY * 30);
 			const earnedFirst = await stakingRewards.earned(owner);
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -370,7 +370,7 @@ describe('StakingRewards', () => {
 			await stakingToken.approve(stakingRewards.target, totalToStake, { from: owner });
 			await stakingRewards.stake(totalToStake, { from: owner });
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -406,7 +406,7 @@ describe('StakingRewards', () => {
 			await stakingToken.approve(stakingRewards.target, totalToStake, { from: owner });
 			await stakingRewards.stake(totalToStake, { from: owner });
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -426,7 +426,7 @@ describe('StakingRewards', () => {
 			await stakingToken.approve(stakingRewards.target, totalToStake, { from: owner });
 			await stakingRewards.stake(totalToStake, { from: owner });
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -440,6 +440,7 @@ describe('StakingRewards', () => {
 			const newDuration = await stakingRewards.rewardsDuration();
 			assert.equal(newDuration, seventyDays);
 
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -452,7 +453,7 @@ describe('StakingRewards', () => {
 			await stakingToken.approve(stakingRewards.target, totalToStake, { from: owner });
 			await stakingRewards.stake(totalToStake, { from: owner });
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -462,7 +463,7 @@ describe('StakingRewards', () => {
 			await time.increase(DAY * 15);
 
 			// New Rewards period much lower
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await expect(stakingRewards.setRewardsDuration(seventyDays, { from: owner }))
                 .to.emit(stakingRewards, 'RewardsDurationUpdated')
                 .withArgs(seventyDays);
@@ -482,7 +483,7 @@ describe('StakingRewards', () => {
 	describe('getRewardForDuration()', () => {
 		it('should increase rewards token balance', async () => {
 			const totalToDistribute = toUnit('5000');
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {
 				from: owner,
 			});
@@ -532,7 +533,7 @@ describe('StakingRewards', () => {
 			await stakingToken.approve(stakingRewards.target, totalToStake, { from: owner });
 			await stakingRewards.stake(totalToStake, { from: owner });
 
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 			await stakingRewards.notifyRewardAmount(toUnit(5000.0), {
 				from: owner,
 			});
@@ -555,8 +556,11 @@ describe('StakingRewards', () => {
 		let localStakingRewards;
 
 		before(async () => {
-            const StakingRewards  = await ethers.getContractFactory("StakingRewards");
-            localStakingRewards = await await upgrades.deployProxy(StakingRewards, [owner, rewardsToken.target, stakingToken.target], {
+			rewardsTokenWithoutTransfer = await ethers.deployContract("RewardsTokenWithoutTransfer");
+       		await rewardsTokenWithoutTransfer.waitForDeployment();
+            
+			const StakingRewards  = await ethers.getContractFactory("StakingRewards");
+            localStakingRewards = await await upgrades.deployProxy(StakingRewards, [owner, rewardsTokenWithoutTransfer.target, stakingToken.target], {
                 initializer: "initialize",
             });
 			await localStakingRewards.grantRole(await localStakingRewards.START_STAKING_ROLE(), owner);
@@ -564,18 +568,18 @@ describe('StakingRewards', () => {
 
 		it('Reverts if the provided reward is greater than the balance.', async () => {
 			const rewardValue = toUnit(1000);
-			await rewardsToken.transfer(localStakingRewards.target, rewardValue, { from: owner });
+			await rewardsTokenWithoutTransfer.approve(localStakingRewards.target, rewardValue, { from: owner });
 			await expect(localStakingRewards.notifyRewardAmount(rewardValue + toUnit(1), { from: owner }))
                 .to.revertedWith('Provided reward too high');
 		});
 
 		it('Reverts if the provided reward is greater than the balance, plus rolled-over balance.', async () => {
 			const rewardValue = toUnit(1000);
-			await rewardsToken.transfer(localStakingRewards.target, rewardValue, { from: owner });
+			await rewardsTokenWithoutTransfer.approve(localStakingRewards.target, rewardValue, { from: owner });
 			localStakingRewards.notifyRewardAmount(rewardValue, {
 				from: owner,
 			});
-			await rewardsToken.transfer(localStakingRewards.target, rewardValue, { from: owner });
+			await rewardsToken.approve(localStakingRewards.target, rewardValue, { from: owner });
 			// Now take into account any leftover quantity.
             await expect(localStakingRewards.notifyRewardAmount(rewardValue + toUnit(1), { from: owner }))
                 .to.revertedWith('Provided reward too high');
@@ -595,7 +599,7 @@ describe('StakingRewards', () => {
 			const totalToDistribute = toUnit('35000');
 
 			// Transfer Rewards to the RewardsDistribution contract address
-			await rewardsToken.transfer(stakingRewards.target, totalToDistribute, { from: owner });
+			await rewardsToken.approve(stakingRewards.target, totalToDistribute, { from: owner });
 
 			// Distribute Rewards called from Synthetix contract as the authority to distribute
 			await stakingRewards.notifyRewardAmount(totalToDistribute, {

@@ -233,6 +233,8 @@ contract StakingRewards is Initializable, UUPSUpgradeable, AccessControlUpgradea
      * @param reward The amount of rewards to be distributed.
      */
     function notifyRewardAmount(uint256 reward) external onlyRole(START_STAKING_ROLE) updateReward(address(0)) {
+        rewardsToken.safeTransferFrom(msg.sender, address(this), reward);
+        
         if (block.timestamp >= periodFinish) {
             rewardRate = reward / rewardsDuration;
         } else {
